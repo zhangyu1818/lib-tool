@@ -1,5 +1,5 @@
 import type { PluginItem } from '@babel/core'
-
+import type { Options as SassOptions } from 'node-sass'
 export type Format = 'cjs' | 'esm'
 
 export type OutDir = {
@@ -11,7 +11,10 @@ export interface UserConfig {
   outDir?: OutDir
   pattern?: string
   browserslist?: string | string[] | { [key: string]: string }
-  plugins?: PluginItem[]
+  babelPlugins?: PluginItem[]
+  originalStyle?: boolean
+  lessOptions?: Less.Options
+  sassOptions?: Omit<SassOptions, 'file'>
 }
 
 export interface InternalConfig extends Required<Pick<UserConfig, 'entry' | 'pattern'>> {

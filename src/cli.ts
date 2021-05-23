@@ -12,4 +12,6 @@ if (args.v || args.version) {
 }
 
 const cwd = slash(process.cwd())
-build({ cwd })
+build({ cwd }).catch((error) => {
+  throw error
+})
