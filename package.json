@@ -11,6 +11,11 @@
     "build": "rimraf lib && tsc",
     "prettier": "prettier --write src/**/*"
   },
+  "author": {
+    "name": "zhangyu1818",
+    "email": "zhangyu1818@qq.com"
+  },
+  "repository": "https://github.com/zhangyu1818/lib-tool",
   "dependencies": {
     "@babel/core": "^7.14.3",
     "@babel/preset-env": "^7.14.2",
