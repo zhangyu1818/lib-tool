@@ -1,11 +1,22 @@
 import ora from 'ora'
 import toolEnv from './toolEnv'
 import getUserConfig, { registerConfig } from './getUserConfig'
-import { cleanFolder, copyFile, getFileOutputPath, getFilesPattern, writeFile } from './utils'
-import getFilesPath from './getFilesPath'
+import {
+  cleanFolder,
+  copyFile,
+  getFileOutputPath,
+  getFilesPattern,
+  isCodeFile,
+  isCSSFile,
+  isLessFile,
+  isSassFile,
+  writeFile,
+} from './utils'
+import getFilesPath, { getDependenciesPath } from './getFilesPath'
 import transform from './transform/transform'
 import transformLess from './transform/transformLess'
 import transformSass from './transform/transformSass'
+import transformCSS from './transform/transformCSS'
 import createDeclaration from './createDeclaration'
 
 import type { Format } from './interface'
@@ -13,6 +24,8 @@ import type { Format } from './interface'
 interface BuildOptions {
   cwd?: string
 }
+
+type FilesPath = string[]
 
 const build = async ({ cwd }: BuildOptions) => {
   if (!cwd) {
@@ -25,12 +38,34 @@ const build = async ({ cwd }: BuildOptions) => {
   const userConfig = getUserConfig()
   toolEnv.set({ userConfig })
 
-  const { entry, pattern, outDir: outDirs, originalStyle = true } = userConfig
+  const {
+    entry,
+    pattern,
+    outDir: outDirs,
+    copyOriginalStyle = true,
+    onlyDependencyFile,
+    fileFilter: userFileFilter,
+  } = userConfig
 
   // get files
   const filesPattern = getFilesPattern(entry, pattern)
   const filesProgress = ora('finding files').start()
-  const filesPath = await getFilesPath(filesPattern)
+
+  let dependenciesList: FilesPath = []
+
+  if (onlyDependencyFile) {
+    dependenciesList = getDependenciesPath(entry, userFileFilter)
+  }
+
+  let filesPath: FilesPath = []
+  if (onlyDependencyFile) {
+    filesPath = dependenciesList.filter(isCodeFile)
+  } else {
+    filesPath = await getFilesPath(filesPattern)
+  }
+  if (userFileFilter) {
+    filesPath = filesPath.filter(userFileFilter)
+  }
   filesProgress.succeed()
 
   // build cjs,esm
@@ -62,7 +97,16 @@ const build = async ({ cwd }: BuildOptions) => {
 
     // transform less
     const lessFilesPattern = getFilesPattern(entry, '**/*.less')
-    const lessFilesPath = await getFilesPath(lessFilesPattern)
+    let lessFilesPath: FilesPath = []
+    if (onlyDependencyFile) {
+      lessFilesPath = dependenciesList.filter(isLessFile)
+    } else {
+      lessFilesPath = await getFilesPath(lessFilesPattern)
+    }
+
+    if (userFileFilter) {
+      lessFilesPath = lessFilesPath.filter(userFileFilter)
+    }
 
     let lessProgress
     if (lessFilesPath.length !== 0) {
@@ -74,7 +118,7 @@ const build = async ({ cwd }: BuildOptions) => {
       const outputPath = getFileOutputPath(lessFilePath, outDir, '.css')
       lessProgress.text = `writing ${outputPath}`
       await writeFile(outputPath, result)
-      if (originalStyle) {
+      if (copyOriginalStyle) {
         lessProgress.text = `copy ${lessFilePath}`
         await copyFile(lessFilePath, outDir)
       }
@@ -83,11 +127,21 @@ const build = async ({ cwd }: BuildOptions) => {
 
     // transform sass/scss
     const sassFilesPattern = getFilesPattern(entry, '**/*.*(sass|scss)')
-    const sassFilesPath = await getFilesPath(sassFilesPattern)
+    let sassFilesPath: FilesPath = []
+
+    if (onlyDependencyFile) {
+      sassFilesPath = dependenciesList.filter(isSassFile)
+    } else {
+      sassFilesPath = await getFilesPath(sassFilesPattern)
+    }
+
+    if (userFileFilter) {
+      sassFilesPath = sassFilesPath.filter(userFileFilter)
+    }
 
     let sassProgress
     if (sassFilesPath.length !== 0) {
-      sassProgress = ora('transform less file').start()
+      sassProgress = ora('transform sass file').start()
     }
 
     for (const sassFilePath of sassFilesPath) {
@@ -96,12 +150,40 @@ const build = async ({ cwd }: BuildOptions) => {
       const outputPath = getFileOutputPath(sassFilePath, outDir, '.css')
       sassProgress.text = `writing ${outputPath}`
       await writeFile(outputPath, result)
-      if (originalStyle) {
+      if (copyOriginalStyle) {
         sassProgress.text = `copy ${sassFilePath}`
         await copyFile(sassFilePath, outDir)
       }
     }
     sassProgress?.succeed('transform sass succeed')
+
+    // transform css
+    const cssFilesPattern = getFilesPattern(entry, '**/*.css')
+    let cssFilesPath: FilesPath = []
+
+    if (onlyDependencyFile) {
+      cssFilesPath = dependenciesList.filter(isCSSFile)
+    } else {
+      cssFilesPath = await getFilesPath(cssFilesPattern)
+    }
+
+    if (userFileFilter) {
+      cssFilesPath = cssFilesPath.filter(userFileFilter)
+    }
+
+    let cssProgress
+    if (cssFilesPath.length !== 0) {
+      cssProgress = ora('transform css file').start()
+    }
+
+    for (const cssFilePath of cssFilesPath) {
+      cssProgress.text = `transform ${cssFilePath}`
+      const result = await transformCSS(cssFilePath)
+      const outputPath = getFileOutputPath(cssFilePath, outDir, '.css')
+      cssProgress.text = `writing ${outputPath}`
+      await writeFile(outputPath, result)
+    }
+    cssProgress?.succeed('transform css succeed')
 
     buildProgress.succeed(`${format} build completed`)
   }

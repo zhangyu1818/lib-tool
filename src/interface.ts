@@ -12,7 +12,14 @@ export interface UserConfig {
   pattern?: string
   browserslist?: string | string[] | { [key: string]: string }
   babelPlugins?: PluginItem[]
-  originalStyle?: boolean
+  copyOriginalStyle?: boolean
+  onlyDependencyFile?:
+    | boolean
+    | {
+        tsConfigPath?: string
+        webpackConfigPath?: string
+      }
+  fileFilter?: (path: string) => boolean
   lessOptions?: Less.Options
   sassOptions?: Omit<SassOptions, 'file'>
 }

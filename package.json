@@ -31,6 +31,7 @@
     "@types/node-sass": "^4.11.1",
     "@types/yargs-parser": "^20.2.0",
     "autoprefixer": "^10.2.5",
+    "dependency-tree": "^8.1.0",
     "fs-extra": "^10.0.0",
     "glob": "^7.1.7",
     "kleur": "^4.1.4",

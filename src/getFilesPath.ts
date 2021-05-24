@@ -1,6 +1,8 @@
+import dependencyTree from 'dependency-tree'
 import glob from 'glob'
+import { getFileRootDir, getRelativePath, getTSConfigPath, getWebpackConfigPath, pathInNodeModules } from './utils'
 
-const getFilesPath = (pattern: string): Promise<string[]> => {
+export const getFilesPath = (pattern: string): Promise<string[]> => {
   return new Promise((resolve, reject) => {
     glob(
       pattern,
@@ -14,6 +16,26 @@ const getFilesPath = (pattern: string): Promise<string[]> => {
       }
     )
   })
+}
+
+export const getDependenciesPath = (filePath: string, filter?: (path: string) => boolean): string[] => {
+  const directory = getFileRootDir(filePath)
+  const tsConfig = getTSConfigPath()
+  const webpackConfig = getWebpackConfigPath()
+  return dependencyTree
+    .toList({
+      filename: filePath,
+      directory,
+      tsConfig,
+      webpackConfig,
+      filter: (path) => {
+        if (filter) {
+          return filter(path) && !pathInNodeModules(path)
+        }
+        return !pathInNodeModules(path)
+      },
+    })
+    .map(getRelativePath)
 }
 
 export default getFilesPath
