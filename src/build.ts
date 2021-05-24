@@ -82,7 +82,7 @@ const build = async ({ cwd }: BuildOptions) => {
     lessProgress?.succeed('transform less succeed')
 
     // transform sass/scss
-    const sassFilesPattern = getFilesPattern(entry, '**/*.*(scss|scss)')
+    const sassFilesPattern = getFilesPattern(entry, '**/*.*(sass|scss)')
     const sassFilesPath = await getFilesPath(sassFilesPattern)
 
     let sassProgress
