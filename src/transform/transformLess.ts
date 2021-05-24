@@ -20,6 +20,7 @@ const transformLess = async (filePath: string) => {
   const data = fs.readFileSync(resolvedFilePath, 'utf-8')
 
   const lessOptions: Less.Options = {
+    javascriptEnabled: true,
     ...userLessOptions,
     paths: [path.dirname(resolvedFilePath), ...(userLessOptions.paths ?? [])],
     filename: resolvedFilePath,
