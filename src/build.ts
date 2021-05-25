@@ -27,6 +27,10 @@ interface BuildOptions {
 
 type FilesPath = string[]
 
+process.on('unhandledRejection', (error) => {
+  throw error
+})
+
 const build = async ({ cwd }: BuildOptions) => {
   if (!cwd) {
     cwd = process.cwd()
