@@ -60,7 +60,7 @@ const getTransformOptions = (format: Format): TransformOptions => {
         },
       ],
       require.resolve('@babel/preset-typescript'),
-      ...(format === 'esm' ? [require.resolve('@babel/preset-react')] : []),
+      require.resolve('@babel/preset-react'),
     ],
     plugins: [
       [
