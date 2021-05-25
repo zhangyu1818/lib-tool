@@ -1,5 +1,5 @@
 import type { PluginItem } from '@babel/core'
-import type { Options as SassOptions } from 'node-sass'
+import type { Options as SassOptions } from 'sass'
 export type Format = 'cjs' | 'esm'
 
 export type OutDir = {

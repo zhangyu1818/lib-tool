@@ -1,4 +1,4 @@
-import * as sass from 'node-sass'
+import * as sass from 'sass'
 import postcss from 'postcss'
 import autoprefixer from 'autoprefixer'
 import toolEnv from '../toolEnv'

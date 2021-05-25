@@ -28,7 +28,7 @@
     "@types/less": "^3.0.2",
     "@types/lodash": "^4.14.170",
     "@types/node": "^15.6.0",
-    "@types/node-sass": "^4.11.1",
+    "@types/sass": "^1.16.0",
     "@types/yargs-parser": "^20.2.0",
     "autoprefixer": "^10.2.5",
     "babel-plugin-module-resolver": "^4.1.0",
@@ -38,14 +38,13 @@
     "kleur": "^4.1.4",
     "less": "^4.1.1",
     "lodash": "^4.17.21",
-    "node-sass": "^6.0.0",
     "ora": "^5.4.0",
     "postcss": "^8.3.0",
+    "sass": "^1.34.0",
     "slash2": "^2.0.0",
     "typescript": "^4.2.4",
     "yargs-parser": "^20.2.7"
   },
-  "optionalDependencies": {},
   "devDependencies": {
     "prettier": "^2.3.0",
     "rimraf": "^3.0.2"
