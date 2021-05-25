@@ -3,7 +3,7 @@ import { existsSync } from 'fs'
 import merge from 'lodash/merge'
 import { CONFIG_FIES, DEFAULT_CONFIG } from './common'
 import toolEnv from './toolEnv'
-import { internalLogError, logError } from './logger'
+import { internalLogError } from './logger'
 
 import type { InternalConfig, UserConfig } from './interface'
 
@@ -28,8 +28,7 @@ const getDefaultEntry = () => {
       return entry
     }
   }
-  logError(`can't find any entry file.`)
-  process.exit(0)
+  return defaultEntry[0]
 }
 
 const getUserConfig = (): UserConfig & InternalConfig => {

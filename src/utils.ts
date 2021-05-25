@@ -52,15 +52,15 @@ export const isCSSFile = (path: string) => path.endsWith('.css')
 export const getTSConfigPath = () => {
   // user config
   const userConfig = toolEnv.get<UserConfig>('userConfig')
+  const cwd = toolEnv.get<string>('cwd') ?? process.cwd()
   const config = userConfig?.onlyDependencyFile
   if (typeof config === 'object') {
-    const userTsConfigPath = config.tsConfigPath ?? ''
+    const userTsConfigPath = config.tsConfigPath ? path.join(cwd, config.tsConfigPath) : ''
     if (fs.existsSync(userTsConfigPath)) {
       return userTsConfigPath
     }
   }
   // try to get config path
-  const cwd = toolEnv.get<string>('cwd') ?? process.cwd()
   const configPath = path.join(cwd, 'tsconfig.json')
   if (fs.existsSync(configPath)) {
     return configPath
@@ -69,14 +69,14 @@ export const getTSConfigPath = () => {
 
 export const getWebpackConfigPath = () => {
   const userConfig = toolEnv.get<UserConfig>('userConfig')
+  const cwd = toolEnv.get<string>('cwd') ?? process.cwd()
   const config = userConfig?.onlyDependencyFile
   if (typeof config === 'object') {
-    const userWebpackConfigPath = config.webpackConfigPath ?? ''
+    const userWebpackConfigPath = config.webpackConfigPath ? path.join(cwd, config.webpackConfigPath) : ''
     if (fs.existsSync(userWebpackConfigPath)) {
       return userWebpackConfigPath
     }
   }
-  const cwd = toolEnv.get<string>('cwd') ?? process.cwd()
   const configPath = path.join(cwd, 'webpack.config.js')
   if (fs.existsSync(configPath)) {
     return configPath
