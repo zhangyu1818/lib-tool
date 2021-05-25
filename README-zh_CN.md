@@ -9,7 +9,7 @@
 - 零配置。
 - 支持JavaScript、TypeScript、React。
 - 同时支持ESM和CJS的打包。
-- 支持Less、Sass、CSS的打包。
+- 同时支持Less、Sass、CSS的打包。
 
 ## 安装
 
@@ -40,12 +40,12 @@ yarn add lib-tool --dev
 或直接执行命令。
 
 ```sh
-$> lib-tool
+$ lib-tool
 ```
 
 默认情况下，`lib-tool`会寻找`src/index.js`、`src/index.ts`、`src/index.jsx`、`src/index.tsx`来作为入口文件。
 
-`lib-tool`是文件到文件进行编译，这代表输出的结构会和入口结构一致，而不会打包为一个`bundle.js`文件。
+`lib-tool`是文件到文件进行编译，这代表输出的结构会和输入的结构一致，而不会打包为一个`bundle.js`文件。
 
 ## 配置
 
@@ -58,10 +58,10 @@ $> lib-tool
 export default {
   entry: 'components/index.tsx',
   lessOptions: {
-    javascriptEnabled: false, // default true
+    javascriptEnabled: false, // 默认为 true
   },
   fileFilter: filePath => !filePath.includes('ignore_dir'),
-  copyOriginalStyle: false, // default true
+  copyOriginalStyle: false, // 默认为 true
   onlyDependencyFile: {
     tsConfigPath: './tsconfig.json',
     webpackConfigPath: './webpack.config.js',
@@ -77,43 +77,31 @@ export default {
 
 ```typescript
 interface UserConfig {
-  /**
-   * 入口文件路径
-   */
+  // 入口文件路径
   entry?: string
-  /**
-   * 输入目录
-   */
+  // 输入目录
   outDir?: {
   	cjs?: string
     esm?: string
 	}
-  /**
-   * pattern用来匹配文件，仅在onlyDependencyFile为false时生效。
-   */
+  // pattern用来匹配文件，仅在onlyDependencyFile为false时生效。
   pattern?: string
   browserslist?: string | string[] | { [key: string]: string }
-  /**
-  	* bable的plugins，lib-tool默认没有添加任何插件
-  	*/
+  // bable的plugins，lib-tool默认只使用了"babel-plugin-module-resolver"
   babelPlugins?: PluginItem[]
-  /**
-   * 复制原始样式文件到输出目录，默认为true
-   */
+  // 复制原始样式文件到输出目录，默认为true
   copyOriginalStyle?: boolean
-  /**
-   * lib-tool默认会使用pattern来匹配文件
-   * 开启这个选项将会只匹配入口文件所依赖的文件
-   */
+	// lib-tool默认会使用pattern来匹配文件
+  // 开启这个选项将会只匹配入口文件所依赖的文件
   onlyDependencyFile?:
     | boolean
     | {
         tsConfigPath?: string
         webpackConfigPath?: string
       }
-  /**
-   * 过滤文件
-   */
+	// import的别名
+  alias?: { [key: string]: string }
+  // 过滤文件
   fileFilter?: (path: string) => boolean
   lessOptions?: Less.Options
   sassOptions?: SassOptions

@@ -9,7 +9,7 @@ Zero configuration, easy way to package a component library.
 - Zero configuration.
 - Support JavaScript, TypeScript, React.
 - Support both ESM and CJS.
-- Support both Less and Sass.
+- Support both Less , Sass and CSS.
 
 # Installation
 
@@ -69,37 +69,27 @@ export default {
 
 ```typescript
 interface UserConfig {
-  /**
-   * entry path
-   */
+  // entry path
   entry?: string
-  /**
-   * output folder name
-   */
+  // output folder name
   outDir?: OutDir
-  /**
-   * pattern used to match files, only on 'onlyDependencyFile = false'
-   */
+  // pattern used to match files, only on 'onlyDependencyFile = false'
   pattern?: string
   browserslist?: string | string[] | { [key: string]: string }
   babelPlugins?: PluginItem[]
-  /**
-   * copy original style file to outDir,default true
-   */
+  // copy original style file to outDir,default true
   copyOriginalStyle?: boolean
-  /**
-   * lib-tool default matches files using the pattern,
-   * this option will only matches dependent files.
-   */
+  // lib-tool default matches files using the pattern,
+  // this option will only matches dependent files.
   onlyDependencyFile?:
     | boolean
     | {
         tsConfigPath?: string
         webpackConfigPath?: string
       }
-  /**
-   * filter files
-   */
+  // import alias
+  alias?: { [key: string]: string }
+	// filter files
   fileFilter?: (path: string) => boolean
   lessOptions?: Less.Options
   sassOptions?: Omit<SassOptions, 'file'>
