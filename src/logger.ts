@@ -1,8 +1,12 @@
 import kleur from 'kleur'
 
+export const logError = (message: string) => {
+  kleur.red(message)
+}
+
 export const internalLogError = (assert: boolean, message: string) => {
   if (!assert) {
-    kleur.red(`Internal error: ${message}`)
+    logError(`Internal error: ${message}`)
     process.exit(0)
   }
 }

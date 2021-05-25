@@ -36,6 +36,10 @@ export interface UserConfig {
         webpackConfigPath?: string
       }
   /**
+   * file resolve alias
+   */
+  alias?: Record<string, string>
+  /**
    * filter files
    */
   fileFilter?: (path: string) => boolean
