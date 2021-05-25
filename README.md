@@ -2,6 +2,8 @@
 
 Zero configuration, easy way to package a component library.
 
+ English | [简体中文](https://github.com/zhangyu1818/lib-tool/blob/main/README-zh_CN.md)
+
 **Features**
 
 - Zero configuration.
