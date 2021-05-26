@@ -3,7 +3,7 @@ import fs from 'fs-extra'
 import { DEFAULT_EXTENSIONS } from './common'
 import toolEnv from './toolEnv'
 
-import type { UserConfig } from './interface'
+import type { InternalConfig, UserConfig } from './interface'
 
 export const getFileRootDir = (filePath: string) => {
   const { dir } = path.parse(path.join(filePath))
@@ -51,34 +51,49 @@ export const isCSSFile = (path: string) => path.endsWith('.css')
 
 export const getTSConfigPath = () => {
   // user config
-  const userConfig = toolEnv.get<UserConfig>('userConfig')
-  const cwd = toolEnv.get<string>('cwd') ?? process.cwd()
-  const config = userConfig?.onlyDependencyFile
-  if (typeof config === 'object') {
-    const userTsConfigPath = config.tsConfigPath ? path.join(cwd, config.tsConfigPath) : ''
-    if (fs.existsSync(userTsConfigPath)) {
-      return userTsConfigPath
-    }
+  const userConfig = toolEnv.get<UserConfig>('userConfig')!
+  const userTsConfigPath = userConfig.tsConfigPath ? getProjectPath(userConfig.tsConfigPath) : ''
+  if (fs.existsSync(userTsConfigPath)) {
+    return userTsConfigPath
   }
   // try to get config path
-  const configPath = path.join(cwd, 'tsconfig.json')
+  const configPath = getProjectPath('tsconfig.json')
   if (fs.existsSync(configPath)) {
     return configPath
   }
 }
 
 export const getWebpackConfigPath = () => {
-  const userConfig = toolEnv.get<UserConfig>('userConfig')
-  const cwd = toolEnv.get<string>('cwd') ?? process.cwd()
-  const config = userConfig?.onlyDependencyFile
-  if (typeof config === 'object') {
-    const userWebpackConfigPath = config.webpackConfigPath ? path.join(cwd, config.webpackConfigPath) : ''
-    if (fs.existsSync(userWebpackConfigPath)) {
-      return userWebpackConfigPath
-    }
+  const userConfig = toolEnv.get<UserConfig>('userConfig')!
+  const userWebpackConfigPath = userConfig.webpackConfigPath ? getProjectPath(userConfig.webpackConfigPath) : ''
+  if (fs.existsSync(userWebpackConfigPath)) {
+    return userWebpackConfigPath
   }
-  const configPath = path.join(cwd, 'webpack.config.js')
+  const configPath = getProjectPath('webpack.config.js')
   if (fs.existsSync(configPath)) {
     return configPath
   }
+}
+
+export const getProjectPath = (...paths: string[]) => {
+  const cwd = toolEnv.get<string>('cwd') ?? process.cwd()
+  return path.join(cwd, ...paths)
+}
+
+export const hasBrowserslistConfig = () => {
+  try {
+    const packageJson = require(getProjectPath('package.json'))
+    if (packageJson.browserslist) {
+      return true
+    }
+  } catch {}
+  if (fs.existsSync(getProjectPath('.browserslistrc'))) {
+    return true
+  }
+  return fs.existsSync(getProjectPath('browserslist'))
+}
+
+export const isTsFile = () => {
+  const { entry } = toolEnv.get<InternalConfig>('userConfig')!
+  return entry.endsWith('.ts') || entry.endsWith('.tsx')
 }

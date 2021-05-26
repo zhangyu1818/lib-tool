@@ -20,7 +20,7 @@ export interface UserConfig {
    */
   pattern?: string
   browserslist?: string | string[] | { [key: string]: string }
-  babelPlugins?: PluginItem[]
+  babelPlugins?: PluginItem[] | ((format: Format) => PluginItem[])
   /**
    * copy original style file to outDir,default true
    */
@@ -29,12 +29,9 @@ export interface UserConfig {
    * lib-tool default matches files using the pattern,
    * this option will only matches dependent files.
    */
-  onlyDependencyFile?:
-    | boolean
-    | {
-        tsConfigPath?: string
-        webpackConfigPath?: string
-      }
+  onlyDependencyFile?: boolean
+  tsConfigPath?: string
+  webpackConfigPath?: string
   /**
    * file resolve alias
    */

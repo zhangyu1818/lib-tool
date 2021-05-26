@@ -3,7 +3,7 @@ import * as ts from 'typescript'
 import path from 'path'
 import toolEnv from '../toolEnv'
 import { internalLogError } from '../logger'
-import { getFileRootDir, getTSConfigPath, getWebpackConfigPath } from '../utils'
+import { getFileRootDir, getTSConfigPath, getWebpackConfigPath, hasBrowserslistConfig, isTsFile } from '../utils'
 
 import type { TransformOptions } from '@babel/core'
 import type { Format, UserConfig } from '../interface'
@@ -27,9 +27,18 @@ const getModuleResolverAlias = () => {
   const webpackConfigFilePath = getWebpackConfigPath()
   if (webpackConfigFilePath) {
     const webpackConfig = require(webpackConfigFilePath)
-    const webpackAlias = webpackConfig?.resolve?.alias
-    if (webpackAlias) {
-      Object.assign(alias, webpackAlias)
+    if (Array.isArray(webpackConfig)) {
+      for (const config of webpackConfig) {
+        const webpackAlias = config?.resolve?.alias
+        if (webpackAlias) {
+          Object.assign(alias, webpackAlias)
+        }
+      }
+    } else {
+      const webpackAlias = webpackConfig?.resolve?.alias
+      if (webpackAlias) {
+        Object.assign(alias, webpackAlias)
+      }
     }
   }
   return alias
@@ -49,18 +58,31 @@ const getTransformOptions = (format: Format): TransformOptions => {
     Object.assign(configsAlias, userAlias)
   }
 
+  const isTSX = isTsFile()
+
   return {
     configFile: false,
     presets: [
       [
+        require.resolve('@babel/preset-typescript'),
+        {
+          isTSX,
+          allExtensions: isTSX,
+        },
+      ],
+      require.resolve('@babel/preset-react'),
+      [
         require.resolve('@babel/preset-env'),
         {
           modules: format === 'esm' ? false : 'auto',
-          targets: browserslist,
+          targets:
+            browserslist ?? hasBrowserslistConfig()
+              ? undefined
+              : {
+                  browsers: ['last 2 versions', 'Firefox ESR', '> 1%', 'ie >= 11'],
+                },
         },
       ],
-      require.resolve('@babel/preset-typescript'),
-      require.resolve('@babel/preset-react'),
     ],
     plugins: [
       [
@@ -70,7 +92,7 @@ const getTransformOptions = (format: Format): TransformOptions => {
           alias: configsAlias,
         },
       ],
-      ...babelPlugins,
+      ...(typeof babelPlugins === 'function' ? babelPlugins(format) : babelPlugins),
     ],
   }
 }

@@ -1,21 +1,15 @@
-import { join } from 'path'
 import { existsSync } from 'fs'
 import merge from 'lodash/merge'
 import { CONFIG_FIES, DEFAULT_CONFIG } from './common'
-import toolEnv from './toolEnv'
-import { internalLogError } from './logger'
+import { getProjectPath } from './utils'
 
 import type { InternalConfig, UserConfig } from './interface'
 
 export const registerConfig = () => {
-  const cwd = toolEnv.get<string>('cwd')
-
-  internalLogError(cwd !== undefined, 'registerConfig cwd is not defined')
-
   require('@babel/register')({
     presets: ['@babel/preset-typescript', '@babel/preset-env'],
     extensions: ['.js', '.ts'],
-    only: CONFIG_FIES.map((file) => join(cwd!, file)),
+    only: CONFIG_FIES.map((file) => getProjectPath(file)),
     babelrc: false,
     cache: false,
   })
@@ -32,17 +26,13 @@ const getDefaultEntry = () => {
 }
 
 const getUserConfig = (): UserConfig & InternalConfig => {
-  const cwd = toolEnv.get<string>('cwd')
-
-  internalLogError(cwd !== undefined, 'getUserConfig cwd is not defined')
-
   const defaultConfig = {
     ...DEFAULT_CONFIG,
     entry: getDefaultEntry(),
   }
 
   for (const file of CONFIG_FIES) {
-    const filePath = join(cwd!, file)
+    const filePath = getProjectPath(file)
     if (existsSync(filePath)) {
       const userConfig = require(filePath).default
       return merge(defaultConfig, userConfig)
