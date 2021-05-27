@@ -16,7 +16,12 @@ export const getFileOutputPath = (filePath: string, outDir: string, ext: string 
   return path.join(root, outDir, ...basePath, `${name}${ext}`)
 }
 
+export const isDirectory = (filePath: string) => fs.statSync(filePath).isDirectory()
+
 export const getFilesPattern = (entryPath: string, pattern: string) => {
+  if (isDirectory(entryPath)) {
+    return path.join(entryPath, pattern)
+  }
   const { dir } = path.parse(entryPath)
   return path.join(dir, pattern)
 }

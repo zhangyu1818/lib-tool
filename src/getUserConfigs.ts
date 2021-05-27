@@ -1,4 +1,5 @@
 import { existsSync } from 'fs'
+import clone from 'lodash/cloneDeep'
 import merge from 'lodash/merge'
 import { CONFIG_FIES, DEFAULT_CONFIG } from './common'
 import { getProjectPath } from './utils'
@@ -25,7 +26,7 @@ const getDefaultEntry = () => {
   return defaultEntry[0]
 }
 
-const getUserConfig = (): UserConfig & InternalConfig => {
+const getUserConfigs = (): (UserConfig & InternalConfig)[] => {
   const defaultConfig = {
     ...DEFAULT_CONFIG,
     entry: getDefaultEntry(),
@@ -34,12 +35,15 @@ const getUserConfig = (): UserConfig & InternalConfig => {
   for (const file of CONFIG_FIES) {
     const filePath = getProjectPath(file)
     if (existsSync(filePath)) {
-      const userConfig = require(filePath).default
-      return merge(defaultConfig, userConfig)
+      let userConfigs = require(filePath).default
+      if (!Array.isArray(userConfigs)) {
+        userConfigs = [userConfigs]
+      }
+      return userConfigs.map((userConfig) => merge(clone(defaultConfig), userConfig))
     }
   }
 
-  return defaultConfig
+  return [defaultConfig]
 }
 
-export default getUserConfig
+export default getUserConfigs
