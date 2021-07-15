@@ -40,7 +40,7 @@ export const getDependenciesPath = (filePath: string, filter?: (path: string) =>
       webpackConfig,
       filter: (path) => {
         if (filter) {
-          return filter(path) && !pathInNodeModules(path)
+          return !pathInNodeModules(path) && filter(path)
         }
         return !pathInNodeModules(path)
       },

@@ -3,7 +3,7 @@ import fs from 'fs-extra'
 import { DEFAULT_EXTENSIONS } from './common'
 import toolEnv from './toolEnv'
 
-import type { InternalConfig, UserConfig } from './interface'
+import type { BuildOptions, InternalConfig, UserConfig } from './interface'
 
 export const getFileRootDir = (filePath: string) => {
   const { dir } = path.parse(path.join(filePath))
@@ -40,7 +40,7 @@ export const copyFile = (filePath: string, outDir: string) => {
 export const cleanFolder = (path: string) => fs.emptydir(path)
 
 export const getRelativePath = (filePath: string) => {
-  const cwd = toolEnv.get<string>('cwd') ?? process.cwd()
+  const cwd = toolEnv.get('cwd')
   return path.relative(cwd, filePath)
 }
 
@@ -56,7 +56,7 @@ export const isCSSFile = (path: string) => path.endsWith('.css')
 
 export const getTSConfigPath = () => {
   // user config
-  const userConfig = toolEnv.get<UserConfig>('userConfig')!
+  const userConfig = toolEnv.get('userConfig')!
   const userTsConfigPath = userConfig.tsConfigPath ? getProjectPath(userConfig.tsConfigPath) : ''
   if (fs.existsSync(userTsConfigPath)) {
     return userTsConfigPath
@@ -69,7 +69,7 @@ export const getTSConfigPath = () => {
 }
 
 export const getWebpackConfigPath = () => {
-  const userConfig = toolEnv.get<UserConfig>('userConfig')!
+  const userConfig = toolEnv.get('userConfig')
   const userWebpackConfigPath = userConfig.webpackConfigPath ? getProjectPath(userConfig.webpackConfigPath) : ''
   if (fs.existsSync(userWebpackConfigPath)) {
     return userWebpackConfigPath
@@ -81,24 +81,47 @@ export const getWebpackConfigPath = () => {
 }
 
 export const getProjectPath = (...paths: string[]) => {
-  const cwd = toolEnv.get<string>('cwd') ?? process.cwd()
+  const cwd = toolEnv.get('cwd')
   return path.join(cwd, ...paths)
 }
 
-export const hasBrowserslistConfig = () => {
-  try {
-    const packageJson = require(getProjectPath('package.json'))
-    if (packageJson.browserslist) {
-      return true
-    }
-  } catch {}
-  if (fs.existsSync(getProjectPath('.browserslistrc'))) {
-    return true
-  }
-  return fs.existsSync(getProjectPath('browserslist'))
+export const setEnvOptions = (options: BuildOptions) => {
+  const { cwd = process.cwd(), entry, mode, outDir, format } = options
+  toolEnv.set({
+    cwd,
+    entry,
+    mode,
+    outDir,
+    format,
+  })
 }
 
-export const isTsFile = () => {
-  const { entry } = toolEnv.get<InternalConfig>('userConfig')!
-  return entry.endsWith('.ts') || entry.endsWith('.tsx')
+export const mergeConfigWithOptions = (userConfig: UserConfig & InternalConfig) => {
+  const config = { ...userConfig }
+
+  const mode = toolEnv.get('mode')
+  const entry = toolEnv.get('entry')
+  const format = toolEnv.get('format')
+  const outDir = toolEnv.get('outDir')
+
+  if (mode) {
+    config.mode = mode
+  }
+  if (entry) {
+    config.entry = entry
+  }
+
+  let defaultOutDir: any = config.outDir
+  if (format) {
+    defaultOutDir = { [format]: defaultOutDir[format] }
+  }
+  if (outDir) {
+    for (const key in defaultOutDir) {
+      defaultOutDir[key] = outDir
+    }
+  }
+  return {
+    ...config,
+    outDir: defaultOutDir,
+  } as UserConfig & InternalConfig
 }

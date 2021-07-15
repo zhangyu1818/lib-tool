@@ -5,15 +5,11 @@ import postcss from 'postcss'
 import autoprefixer from 'autoprefixer'
 
 import toolEnv from '../toolEnv'
-import { internalLogError } from '../logger'
-
-import type { UserConfig } from '../interface'
 
 const transformLess = async (filePath: string) => {
-  const cwd = toolEnv.get<string>('cwd')!
-  internalLogError(cwd !== undefined, 'transformLess cwd is not defined')
+  const cwd = toolEnv.get('cwd')!
 
-  const userConfig = toolEnv.get<UserConfig>('userConfig')!
+  const userConfig = toolEnv.get('userConfig')!
   const { lessOptions: userLessOptions = {} } = userConfig
 
   const resolvedFilePath = path.resolve(cwd, filePath)

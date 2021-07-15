@@ -11,7 +11,9 @@ if (args.v || args.version) {
   process.exit(0)
 }
 
+const { entry, mode, outDir, format } = args
+
 const cwd = slash(process.cwd())
-build({ cwd }).catch((error) => {
+build({ cwd, entry, mode, outDir, format }).catch((error) => {
   throw error
 })

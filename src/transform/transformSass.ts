@@ -2,10 +2,9 @@ import * as sass from 'sass'
 import postcss from 'postcss'
 import autoprefixer from 'autoprefixer'
 import toolEnv from '../toolEnv'
-import { UserConfig } from '../interface'
 
 const transformSass = async (filePath: string) => {
-  const userConfig = toolEnv.get<UserConfig>('userConfig')!
+  const userConfig = toolEnv.get('userConfig')!
   const { sassOptions } = userConfig
 
   return new Promise<sass.Result>((resolve, reject) =>

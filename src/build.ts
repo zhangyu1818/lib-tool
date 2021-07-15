@@ -10,6 +10,8 @@ import {
   isCSSFile,
   isLessFile,
   isSassFile,
+  mergeConfigWithOptions,
+  setEnvOptions,
   writeFile,
 } from './utils'
 import getFilesPath, { getDependenciesPath } from './getFilesPath'
@@ -19,11 +21,7 @@ import transformSass from './transform/transformSass'
 import transformCSS from './transform/transformCSS'
 import createDeclaration from './createDeclaration'
 
-import type { Format } from './interface'
-
-interface BuildOptions {
-  cwd?: string
-}
+import type { BuildOptions, Format } from './interface'
 
 type FilesPath = string[]
 
@@ -31,29 +29,22 @@ process.on('unhandledRejection', (error) => {
   throw error
 })
 
-const build = async ({ cwd }: BuildOptions) => {
-  if (!cwd) {
-    cwd = process.cwd()
-  }
-  toolEnv.set({ cwd })
-
+const build = async (options: BuildOptions) => {
   registerConfig()
 
-  const cleanFolderCache = new Set<string>()
+  setEnvOptions(options)
+
+  const cleanFolderCache: Set<string> = new Set()
 
   const userConfigs = getUserConfigs()
 
   for (const userConfig of userConfigs) {
-    toolEnv.set({ userConfig })
+    const mergedConfig = mergeConfigWithOptions(userConfig)
+    toolEnv.set({ userConfig: mergedConfig })
 
-    const {
-      entry,
-      pattern,
-      outDir: outDirs,
-      copyOriginalStyle = true,
-      onlyDependencyFile,
-      fileFilter: userFileFilter,
-    } = userConfig
+    const { entry, pattern, outDir: outDirs, copyStyles, mode, filter: userFileFilter } = userConfig
+
+    const dependenceMode = mode == 'dependence'
 
     // get files
     const filesPattern = getFilesPattern(entry, pattern)
@@ -61,12 +52,12 @@ const build = async ({ cwd }: BuildOptions) => {
 
     let dependenciesList: FilesPath = []
 
-    if (onlyDependencyFile) {
+    if (dependenceMode) {
       dependenciesList = getDependenciesPath(entry, userFileFilter)
     }
 
     let filesPath: FilesPath = []
-    if (onlyDependencyFile) {
+    if (dependenceMode) {
       filesPath = dependenciesList.filter(isCodeFile)
     } else {
       filesPath = await getFilesPath(filesPattern)
@@ -109,7 +100,7 @@ const build = async ({ cwd }: BuildOptions) => {
       // transform less
       const lessFilesPattern = getFilesPattern(entry, '**/*.less')
       let lessFilesPath: FilesPath = []
-      if (onlyDependencyFile) {
+      if (dependenceMode) {
         lessFilesPath = dependenciesList.filter(isLessFile)
       } else {
         lessFilesPath = await getFilesPath(lessFilesPattern)
@@ -129,7 +120,7 @@ const build = async ({ cwd }: BuildOptions) => {
         const outputPath = getFileOutputPath(lessFilePath, outDir, '.css')
         lessProgress.text = `writing ${outputPath}`
         await writeFile(outputPath, result)
-        if (copyOriginalStyle) {
+        if (copyStyles) {
           lessProgress.text = `copy ${lessFilePath}`
           await copyFile(lessFilePath, outDir)
         }
@@ -140,7 +131,7 @@ const build = async ({ cwd }: BuildOptions) => {
       const sassFilesPattern = getFilesPattern(entry, '**/*.*(sass|scss)')
       let sassFilesPath: FilesPath = []
 
-      if (onlyDependencyFile) {
+      if (dependenceMode) {
         sassFilesPath = dependenciesList.filter(isSassFile)
       } else {
         sassFilesPath = await getFilesPath(sassFilesPattern)
@@ -161,7 +152,7 @@ const build = async ({ cwd }: BuildOptions) => {
         const outputPath = getFileOutputPath(sassFilePath, outDir, '.css')
         sassProgress.text = `writing ${outputPath}`
         await writeFile(outputPath, result)
-        if (copyOriginalStyle) {
+        if (copyStyles) {
           sassProgress.text = `copy ${sassFilePath}`
           await copyFile(sassFilePath, outDir)
         }
@@ -172,7 +163,7 @@ const build = async ({ cwd }: BuildOptions) => {
       const cssFilesPattern = getFilesPattern(entry, '**/*.css')
       let cssFilesPath: FilesPath = []
 
-      if (onlyDependencyFile) {
+      if (dependenceMode) {
         cssFilesPath = dependenciesList.filter(isCSSFile)
       } else {
         cssFilesPath = await getFilesPath(cssFilesPattern)

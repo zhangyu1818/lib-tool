@@ -4,11 +4,9 @@ import postcss from 'postcss'
 import autoprefixer from 'autoprefixer'
 
 import toolEnv from '../toolEnv'
-import { internalLogError } from '../logger'
 
 const transformCSS = async (filePath: string) => {
-  const cwd = toolEnv.get<string>('cwd')!
-  internalLogError(cwd !== undefined, 'transformCSS cwd is not defined')
+  const cwd = toolEnv.get('cwd')!
 
   const resolvedFilePath = path.resolve(cwd, filePath)
   const css = fs.readFileSync(resolvedFilePath, 'utf-8')
