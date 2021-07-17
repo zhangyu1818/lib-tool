@@ -85,6 +85,11 @@ export const getProjectPath = (...paths: string[]) => {
   return path.join(cwd, ...paths)
 }
 
+export const isTsFile = () => {
+  const { entry } = toolEnv.get('userConfig')!
+  return entry.endsWith('.ts') || entry.endsWith('.tsx')
+}
+
 export const setEnvOptions = (options: BuildOptions) => {
   const { cwd = process.cwd(), entry, mode, outDir, format } = options
   toolEnv.set({

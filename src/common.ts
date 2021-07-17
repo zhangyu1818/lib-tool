@@ -2,7 +2,7 @@ import type { InternalConfig } from './interface'
 
 export const DEFAULT_EXTENSIONS = ['.js', '.jsx', '.es6', '.es', '.mjs', '.ts', '.tsx']
 
-export const CONFIG_FIES = ['.toolrc.js', '.toolrc.ts']
+export const CONFIG_FIES = ['toolrc.js', 'toolrc.ts']
 
 export const DEFAULT_PATTERN = '**/*.*(js|ts|jsx|tsx)'
 

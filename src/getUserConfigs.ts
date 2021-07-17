@@ -1,6 +1,4 @@
 import { existsSync } from 'fs'
-import clone from 'lodash/cloneDeep'
-import merge from 'lodash/merge'
 import { CONFIG_FIES, DEFAULT_CONFIG } from './common'
 import { getProjectPath } from './utils'
 
@@ -39,7 +37,7 @@ const getUserConfigs = (): (UserConfig & InternalConfig)[] => {
       if (!Array.isArray(userConfigs)) {
         userConfigs = [userConfigs]
       }
-      return userConfigs.map((userConfig) => merge(clone(defaultConfig), userConfig))
+      return userConfigs.map((userConfig) => ({ ...defaultConfig, ...userConfig }))
     }
   }
 
