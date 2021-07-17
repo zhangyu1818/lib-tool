@@ -27,7 +27,7 @@ yarn add lib-tool --dev
 
 在**package.json**中引用。
 
-```json
+```js
 {
   "scripts": {
     "build": "lib-tool"
@@ -73,7 +73,7 @@ export default {
 
 打包输出目录，`key`为打包格式，默认值：
 
-```json
+```js
 {
   esm: 'es',
   cjs: 'lib',
