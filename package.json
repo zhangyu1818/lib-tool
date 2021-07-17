@@ -18,6 +18,8 @@
   "repository": "https://github.com/zhangyu1818/lib-tool",
   "dependencies": {
     "@babel/core": "^7.14.3",
+    "@babel/preset-env": "^7.14.7",
+    "@babel/preset-typescript": "^7.14.5",
     "@babel/register": "^7.13.16",
     "@types/babel__core": "^7.1.14",
     "@types/fs-extra": "^9.0.11",
@@ -30,6 +32,7 @@
     "autoprefixer": "^10.2.5",
     "dependency-tree": "^8.1.0",
     "fs-extra": "^10.0.0",
+    "generate-d-ts": "^1.0.1",
     "glob": "^7.1.7",
     "kleur": "^4.1.4",
     "less": "^4.1.1",

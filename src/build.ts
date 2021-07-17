@@ -1,4 +1,5 @@
 import ora from 'ora'
+import { createDeclarations } from 'generate-d-ts'
 import toolEnv from './toolEnv'
 import getUserConfigs, { registerConfig } from './getUserConfigs'
 import {
@@ -19,7 +20,6 @@ import transform from './transform/transform'
 import transformLess from './transform/transformLess'
 import transformSass from './transform/transformSass'
 import transformCSS from './transform/transformCSS'
-import createDeclaration from './createDeclaration'
 
 import type { BuildOptions, Format } from './interface'
 
@@ -30,9 +30,9 @@ process.on('unhandledRejection', (error) => {
 })
 
 const build = async (options: BuildOptions) => {
-  registerConfig()
-
   setEnvOptions(options)
+
+  registerConfig()
 
   const cleanFolderCache: Set<string> = new Set()
 
@@ -42,7 +42,7 @@ const build = async (options: BuildOptions) => {
     const mergedConfig = mergeConfigWithOptions(userConfig)
     toolEnv.set({ userConfig: mergedConfig })
 
-    const { entry, pattern, outDir: outDirs, copyStyles, mode, filter: userFileFilter } = userConfig
+    const { entry, pattern, outDir: outDirs, copyStyles, mode, filter: userFileFilter } = mergedConfig
 
     const dependenceMode = mode == 'dependence'
 
@@ -91,7 +91,7 @@ const build = async (options: BuildOptions) => {
       }
 
       buildProgress.text = `writing declaration files`
-      const declarationFiles = createDeclaration(filesPath, outDir)
+      const declarationFiles = createDeclarations(filesPath, outDir)
       for (const [declarationFilePath, declarationFileContent] of Object.entries(declarationFiles)) {
         buildProgress.text = `writing ${declarationFilePath}`
         await writeFile(declarationFilePath, declarationFileContent)
