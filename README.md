@@ -164,7 +164,7 @@ lib-tool --entry entry/index.ts --mode dependence --format esm --outDir dist
 
 Example:
 
-以依赖打包`components/index.tsx`以`esm`格式打包到`dist`目录，打包`components`目录下所有`less`文件到`styles`目录。
+依赖打包`components/index.tsx`以`esm`格式打包到`dist`目录，打包`components`目录下所有`less`文件到`styles`目录。
 
 ```typescript
 import { UserConfig, babelConfig } from "lib-tool";
