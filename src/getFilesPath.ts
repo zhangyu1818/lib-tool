@@ -1,12 +1,15 @@
 import dependencyTree from 'dependency-tree'
 import glob from 'glob'
-import { getFileRootDir, getRelativePath, getTSConfigPath, getWebpackConfigPath, pathInNodeModules } from './utils'
+import { getFileRootDir, getProjectPath, getTSConfigPath, getWebpackConfigPath, pathInNodeModules } from './utils'
+import toolEnv from './toolEnv'
 
 export const getFilesPath = (pattern: string): Promise<string[]> => {
+  const cwd = toolEnv.get('cwd')
   return new Promise((resolve, reject) => {
     glob(
       pattern,
       {
+        cwd,
         ignore: [
           'node_modules/**/*',
           '**/__tests__',
@@ -29,23 +32,21 @@ export const getFilesPath = (pattern: string): Promise<string[]> => {
 }
 
 export const getDependenciesPath = (filePath: string, filter?: (path: string) => boolean): string[] => {
-  const directory = getFileRootDir(filePath)
+  const directory = getProjectPath(getFileRootDir(filePath))
   const tsConfig = getTSConfigPath()
   const webpackConfig = getWebpackConfigPath()
-  return dependencyTree
-    .toList({
-      filename: filePath,
-      directory,
-      tsConfig,
-      webpackConfig,
-      filter: (path) => {
-        if (filter) {
-          return !pathInNodeModules(path) && filter(path)
-        }
-        return !pathInNodeModules(path)
-      },
-    })
-    .map(getRelativePath)
+  return dependencyTree.toList({
+    filename: filePath,
+    directory,
+    tsConfig,
+    webpackConfig,
+    filter: (path) => {
+      if (filter) {
+        return !pathInNodeModules(path) && filter(path)
+      }
+      return !pathInNodeModules(path)
+    },
+  })
 }
 
 export default getFilesPath

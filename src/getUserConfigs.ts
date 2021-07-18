@@ -17,7 +17,7 @@ export const registerConfig = () => {
 const getDefaultEntry = () => {
   const defaultEntry = ['src/index.js', 'src/index.ts', 'src/index.jsx', 'src/index.tsx']
   for (const entry of defaultEntry) {
-    if (existsSync(entry)) {
+    if (existsSync(getProjectPath(entry))) {
       return entry
     }
   }

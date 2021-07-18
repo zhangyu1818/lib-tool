@@ -6,12 +6,12 @@ import toolEnv from './toolEnv'
 import type { BuildOptions, InternalConfig, UserConfig } from './interface'
 
 export const getFileRootDir = (filePath: string) => {
-  const { dir } = path.parse(path.join(filePath))
+  const { dir } = path.parse(getRelativePath(filePath))
   return dir.split(path.sep)[0]
 }
 
 export const getFileOutputPath = (filePath: string, outDir: string, ext: string = '.js') => {
-  const { root, dir, name } = path.parse(path.join(filePath))
+  const { root, dir, name } = path.parse(getRelativePath(filePath))
   const basePath = dir.split(path.sep).slice(1)
   return path.join(root, outDir, ...basePath, `${name}${ext}`)
 }
@@ -125,8 +125,16 @@ export const mergeConfigWithOptions = (userConfig: UserConfig & InternalConfig) 
       defaultOutDir[key] = outDir
     }
   }
-  return {
+  return absoluteConfigPath({
     ...config,
     outDir: defaultOutDir,
-  } as UserConfig & InternalConfig
+  })
+}
+
+export const absoluteConfigPath = (config: UserConfig & InternalConfig) => {
+  config.entry = getProjectPath(config.entry)
+  Object.entries(config.outDir).forEach(([format, path]) => {
+    config.outDir[format] = getProjectPath(path)
+  })
+  return config
 }
